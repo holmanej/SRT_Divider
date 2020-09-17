@@ -1,4 +1,3 @@
-SRT_Divider
 SRT Divider
 ===========
 
