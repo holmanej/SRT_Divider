@@ -24,67 +24,60 @@ entity Radix4Stage_8bit is
 	port(
 		clk			: in  STD_LOGIC;
 		d_in		: in  UNSIGNED (7 downto 0);
-		p_in		: in  UNSIGNED (17 downto 0);
+		p_in		: in  UNSIGNED (15 downto 0);
 		q_in		: in  UNSIGNED (7 downto 0);
 		d_out		: out UNSIGNED (7 downto 0);
-		p_out		: out UNSIGNED (17 downto 0);
+		p_out		: out UNSIGNED (15 downto 0);
 		q_out		: out UNSIGNED (7 downto 0)
 	);
 end Radix4Stage_8bit;
 	
 architecture Behavioral of Radix4Stage_8bit is
-
-	component MaskLUT_8bit is
-		port(
-			d_in		: in  UNSIGNED (7 downto 0);
-			p_in		: in  UNSIGNED (14 downto 0);
-			a_out		: out UNSIGNED (1 downto 0)
-		);
-	end component;
-
-	component QLUT_2bit is
-		port(
-			a_in		: in  UNSIGNED (3 downto 0);
-			q_out		: out UNSIGNED (1 downto 0)
-		);
-	end component;
 	
-	signal		d1_int		:	UNSIGNED (9 downto 0) := (others => '0');
-	signal		d2_int		:	UNSIGNED (9 downto 0) := (others => '0');
-	signal		d3_int		:	UNSIGNED (9 downto 0) := (others => '0');
-	signal		d_prod		:	UNSIGNED (17 downto 0) := (others => '0');
+	signal		d25			:	UNSIGNED (9 downto 0) := (others => '0');
+	signal		d50			:	UNSIGNED (9 downto 0) := (others => '0');
+	signal		d75			:	UNSIGNED (9 downto 0) := (others => '0');
 	
-	signal		a_int		:	UNSIGNED (1 downto 0) := (others => '0');
-	signal		p_int		:	UNSIGNED (17 downto 0) := (others => '0');
+	signal		p25			:	UNSIGNED (15 downto 0) := (others => '0');
+	signal		p50			:	UNSIGNED (15 downto 0) := (others => '0');
+	signal		p75			:	UNSIGNED (15 downto 0) := (others => '0');
+	
+	signal		p_int		:	UNSIGNED (15 downto 0) := (others => '0');
 	signal		q_int		:	UNSIGNED (1 downto 0) := (others => '0');
 
 begin
-
-	d1_int <= unsigned("00" & d_in);
-	d2_int <= unsigned("0" & d_in & "0");
-	d3_int <= d1_int + d2_int;
 	
-	MaskLUT: MaskLUT_8bit port map (
-		d_in	=> d_in,
-		p_in	=> p_in(14 downto 0),
-		a_out	=> a_int
-	);
+	d25 <= unsigned("00" & d_in);
+	d50 <= "0" & unsigned(d_in) & "0";
+	d75 <= d25 + d50;
 	
-	q_int <= "11" when (p_in(15 downto 6) > d3_int) else a_int;
+	p25 <= p_in - (d25 & "000000");
+	p50 <= p_in - (d50 & "000000");
+	p75 <= p_in - (d75 & "000000");
 	
-	d_prod <= d3_int & "00000000" when (q_int = "11") else
-			  d2_int & "00000000" when (q_int = "10") else
-			  d1_int & "00000000" when (q_int = "01") else
-			  (others => '0');
-	
-	p_int <= p_in sll 2;
+	process(p_in, d25, d50, d75, p25, p50, p75)
+	begin
+		if (p_in(15 downto 6) < d25) then
+			q_int <= "00";
+			p_int <= p_in;
+		elsif (p_in(15 downto 6) < d50) then
+			q_int <= "01";
+			p_int <= p25;
+		elsif (p_in(15 downto 6) < d75) then
+			q_int <= "10";
+			p_int <= p50;
+		else
+			q_int <= "11";
+			p_int <= p75;
+		end if;
+	end process;
 	
 	process(clk)
 	begin
 		if (rising_edge(clk)) then
 			d_out <= d_in;
 			q_out <= q_in(5 downto 0) & q_int;
-			p_out <= p_int - d_prod;
+			p_out <= p_int sll 2;
 		end if;
 	end process;
 	

@@ -38,6 +38,10 @@ architecture Behavioral of Radix4Stage_8bit is
 	signal		d50			:	UNSIGNED (9 downto 0) := (others => '0');
 	signal		d75			:	UNSIGNED (9 downto 0) := (others => '0');
 	
+	signal		p25			:	UNSIGNED (15 downto 0) := (others => '0');
+	signal		p50			:	UNSIGNED (15 downto 0) := (others => '0');
+	signal		p75			:	UNSIGNED (15 downto 0) := (others => '0');
+	
 	signal		p_int		:	UNSIGNED (15 downto 0) := (others => '0');
 	signal		q_int		:	UNSIGNED (1 downto 0) := (others => '0');
 
@@ -47,15 +51,26 @@ begin
 	d50 <= "0" & unsigned(d_in) & "0";
 	d75 <= d25 + d50;
 	
-	q_int <= "00" when (p_in(15 downto 6) < d25) else
-			 "01" when (p_in(15 downto 6) < d50) else
-			 "10" when (p_in(15 downto 6) < d75) else
-			 "11";
-			 
-	p_int <= p_in when (p_in(15 downto 6) < d25) else
-			 p_in - (d25 & "000000") when (p_in(15 downto 6) < d50) else
-			 p_in - (d50 & "000000") when (p_in(15 downto 6) < d75) else
-			 p_in - (d75 & "000000");
+	p25 <= p_in - (d25 & "000000");
+	p50 <= p_in - (d50 & "000000");
+	p75 <= p_in - (d75 & "000000");
+	
+	process(p_in, d25, d50, d75, p25, p50, p75)
+	begin
+		if (p_in(15 downto 6) < d25) then
+			q_int <= "00";
+			p_int <= p_in;
+		elsif (p_in(15 downto 6) < d50) then
+			q_int <= "01";
+			p_int <= p25;
+		elsif (p_in(15 downto 6) < d75) then
+			q_int <= "10";
+			p_int <= p50;
+		else
+			q_int <= "11";
+			p_int <= p75;
+		end if;
+	end process;
 	
 	process(clk)
 	begin

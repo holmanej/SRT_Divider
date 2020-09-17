@@ -28,11 +28,6 @@ architecture Behavioral of tb_Radix4Division_8bit is
 	
 	signal	q_match		:	STD_LOGIC := '0';
 	signal	r_match		:	STD_LOGIC := '0';
-	
-	constant	nL		:	NATURAL := 0;
-	constant	nH		:	NATURAL := 255;
-	constant	dL		:	NATURAL := 1;
-	constant	dH		:	NATURAL := 255;
 
 begin
 
@@ -40,8 +35,8 @@ begin
 	begin
 		wait for 10 ns;
 		
-		for i in nL to nH loop
-			for j in dL to dH loop
+		for i in 0 to 255 loop
+			for j in 1 to 255 loop
 				n_in <= std_logic_vector(to_unsigned(i, 8));
 				d_in <= std_logic_vector(to_unsigned(j, 8));
 				
@@ -55,8 +50,8 @@ begin
 	begin	
 		wait for 60 ns;
 		
-		for i in nL to nH loop
-			for j in dL to dH loop				
+		for i in 0 to 255 loop
+			for j in 1 to 255 loop				
 				q_test <= to_unsigned(i / j, 8);
 				r_test <= to_unsigned(i mod j, 8);
 				
