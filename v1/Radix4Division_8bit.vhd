@@ -36,25 +36,25 @@ architecture Behavioral of Radix4Division_8bit is
 		port(
 			clk			: in  STD_LOGIC;
 			d_in		: in  UNSIGNED (7 downto 0);
-			p_in		: in  UNSIGNED (17 downto 0);
+			p_in		: in  UNSIGNED (15 downto 0);
 			q_in		: in  UNSIGNED (7 downto 0);
 			d_out		: out UNSIGNED (7 downto 0);
-			p_out		: out UNSIGNED (17 downto 0);
+			p_out		: out UNSIGNED (15 downto 0);
 			q_out		: out UNSIGNED (7 downto 0)
 		);
 	end component;
 	
-	type		u18_array		is	ARRAY (integer range <>) of UNSIGNED (17 downto 0);
+	type		u16_array		is	ARRAY (integer range <>) of UNSIGNED (15 downto 0);
 	type		u8_array		is	ARRAY (integer range <>) of UNSIGNED (7 downto 0);
 	
 	signal		d_int			:	u8_array(0 to 4) := (others => (others => '0'));
-	signal		p_int			:	u18_array(0 to 4) := (others => (others => '0'));
+	signal		p_int			:	u16_array(0 to 4) := (others => (others => '0'));
 	signal		q_int			:	u8_array(0 to 4) := (others => (others => '0'));
 
 begin
 
 	d_int(0) <= unsigned(d_in);
-	p_int(0) <= "0000000000" & unsigned(n_in);
+	p_int(0) <= x"00" & unsigned(n_in);
 
 	Stages: for i in 0 to 3 generate
 		Stage: Radix4Stage_8bit port map (

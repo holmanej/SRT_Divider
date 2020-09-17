@@ -35,7 +35,7 @@ begin
 	begin
 		wait for 10 ns;
 		
-		for i in 1 to 255 loop
+		for i in 0 to 255 loop
 			for j in 1 to 255 loop
 				n_in <= std_logic_vector(to_unsigned(i, 8));
 				d_in <= std_logic_vector(to_unsigned(j, 8));
@@ -50,7 +50,7 @@ begin
 	begin	
 		wait for 60 ns;
 		
-		for i in 1 to 255 loop
+		for i in 0 to 255 loop
 			for j in 1 to 255 loop				
 				q_test <= to_unsigned(i / j, 8);
 				r_test <= to_unsigned(i mod j, 8);
